@@ -76,7 +76,7 @@
 <!-- dtl:block:RecordNumber -->
 <!-- dtl:block:RecordTitle -->
                 <td>
-                    <div title="$QData{"Title"}">$QData{"Title","40"}</div>
+                    <div title="$QData{"Title"}">$QData{"CleanedTitle"}</div>
                 </td>
 <!-- dtl:block:RecordTitle -->
 <!-- dtl:block:RecordCategory -->

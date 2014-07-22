@@ -165,6 +165,30 @@ sub Run {
                     for my $Column (@ShowColumns) {
 
                         next COLUMN if ( $Column eq 'Language' && !$Self->{MultiLanguage} );
+                        if ( $Column == 'Title' ) {
+                            $Data{CleanedTitle}
+                                = $Self->{FAQObject}->FAQArticleTitleClean( Title => $Data{Title} );
+                            $Self->{LayoutObject}->Block(
+                                Name => 'Record' . $Column,
+                                Data => {
+                                    %Param,
+                                    %Data,
+                                },
+                            );
+                            $Self->{LogObject}->Log(
+                                Priority => 'error',
+                                Message  => "$Data{WholeTitle} / $Data{Title}",
+                            );
+                        }
+                        else {
+                            $Self->{LayoutObject}->Block(
+                                Name => 'Record' . $Column,
+                                Data => {
+                                    %Param,
+                                    %Data,
+                                },
+                            );
+                        }
                         $Self->{LayoutObject}->Block(
                             Name => 'Record' . $Column,
                             Data => {
