@@ -381,6 +381,12 @@ sub FAQGet {
     $Data{VoteResult} = $VoteResult;
     $Data{Votes} = $VoteData->{Votes} || 0;
 
+    # clean up FAQ title and truncate by FAQ::TitleSize value
+    if ( defined $Data{Title} ) {
+        $Data{CleanedTitle}
+            = $Self->FAQArticleTitleClean( Title => $Data{Title} );
+    }
+
     return %Data;
 }
 

@@ -77,7 +77,7 @@
                             $QData{"Number"}.
 <!-- dtl:block:InfoBoxFAQMiniListItemRowPositionNumber -->
                             <a href="$Env{"Baselink"}Action=AgentFAQZoom;ItemID=$LQData{"ItemID"};Nav=$LQData{"Nav"}" title="$QData{"Title"} ($QData{"CategoryName"})">
-                                $QData{"Title","50"}
+                                $QData{"CleanedTitle"}
                             </a>
                             <span>
                                 $QData{"CategoryShortName","15"} - $QData{"Language"} - $Text{"$Data{"State"}"} - $TimeShort{"$Data{"Created"}"}

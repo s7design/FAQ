@@ -93,11 +93,6 @@ sub Run {
         return $Self->{LayoutObject}->ErrorScreen();
     }
 
-    if ( defined $FAQData{Title} ) {
-        $FAQData{CleanedTitle}
-            = $Self->{FAQObject}->FAQArticleTitleClean( Title => $FAQData{Title} );
-    }
-
     # check user permission
     my $Permission = $Self->{FAQObject}->CheckCategoryUserPermission(
         UserID     => $Self->{UserID},

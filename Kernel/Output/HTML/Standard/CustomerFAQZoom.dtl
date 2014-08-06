@@ -21,7 +21,7 @@
     <div class="Content">
         <div class="FAQHeader">
             <h2 title="$QData{"Title"}">
-                $QData{"Title"}
+                $QData{"CleanedTitle"}
             </h2>
             <ul id="FAQOptions">
                 <li><a href="$Env{"Baselink"}Action=CustomerFAQPrint;ItemID=$LQData{"ItemID"}" class="Print AsPopup" title="$Text{"Print"}">$Text{"Print"}</a></li>
@@ -33,14 +33,14 @@
             <h3>
 <!-- dtl:block:FAQPathCategoryElement -->
                 $Config{"FAQ::Explorer::Path::Separator"}
-                <a href="$Env{"Baselink"}Action=CustomerFAQExplorer;CategoryID=$LQData{"CategoryID"}">
+                <a href="$Env{"Baselink"}Action=CustomerFAQExplorer;CategoryID=$LQData{"CategoryID"}" title="$QData{"Name"}">
                     $QData{"Name"}
                 </a>
 <!-- dtl:block:FAQPathCategoryElement -->
 <!-- dtl:block:FAQPathItemElement -->
                 $Config{"FAQ::Explorer::Path::Separator"}
-                <a href="$Env{"Baselink"}Action=$Env{"Action"};CategoryID=$LQData{"CategoryID"};ItemID=$LQData{"ItemID"}">
-                    $QData{"Title"}
+                <a href="$Env{"Baselink"}Action=$Env{"Action"};CategoryID=$LQData{"CategoryID"};ItemID=$LQData{"ItemID"}" title="$QData{"Title"}">
+                    $QData{"CleanedTitle"}
                 </a>
 <!-- dtl:block:FAQPathItemElement -->
             </h3>

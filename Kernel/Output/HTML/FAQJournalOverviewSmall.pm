@@ -113,6 +113,7 @@ sub Run {
                     Name => 'Record',
                     Data => {
                         %Param,
+                        %FAQ,
                         %{$JournalEntry},
                         Counter => $Counter,
                     },

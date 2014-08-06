@@ -79,7 +79,7 @@
                                 $QData{"Number"}.
 <!-- dtl:block:InfoBoxFAQMiniListItemRowPositionNumber -->
                                 <a href="$Env{"Baselink"}Action=PublicFAQZoom;ItemID=$LQData{"ItemID"}" title="$QData{"Title"} ($QData{"CategoryName"})">
-                                    $QData{"Title","50"}
+                                    $QData{"CleanedTitle"}
                                 </a>
                                 <span>
                                     $QData{"CategoryShortName","15"} - $QData{"Language"} - $Text{"$Data{"State"}"} - $TimeShort{"$Data{"Created"}"}
@@ -191,7 +191,7 @@
 <!-- dtl:block:Record -->
                                 <tr>
                                     <td class="FAQNumber" title="$QData{"Number"}"><a href="$Env{"Baselink"}Action=PublicFAQZoom;ItemID=$LQData{"FAQID"};ZoomBackLink=$LQData{"ZoomBackLink"};">$QData{"Number"}</a></td>
-                                    <td class="Title" title="$QData{"Title"}">$QData{"Title","60"}</td>
+                                    <td class="Title" title="$QData{"Title"}">$QData{"CleanedTitle"}</td>
                                     <td class="Category" title="$QData{"CategoryName"}">$QData{"CategoryName","45"}</td>
 <!-- dtl:block:RecordLanguage -->
                                     <td class="Language" title="$QData{"Language"}">$QData{"Language","5"}</td>
