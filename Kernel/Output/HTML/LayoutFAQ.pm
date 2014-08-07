@@ -1028,11 +1028,12 @@ sub FAQShowTop10 {
 Shows an info box wih the Quick Search.
 
     $LayoutObject->FAQShowQuickSearch(
-        Mode            => 'Public',                   # (Agent, Customer, Public)
+        Mode            => 'Public',                                           # (Agent, Customer, Public)
         Interface       => $Self->{Interface},
         InterfaceStates => $Self->{InterfaceStates},
         UserID          => 1,
-        Nav             => 'none',                     # optional
+        Nav             => 'none',                                             # optional
+        SearchBackLink  => "Action=PublicFAQExplorer;CategoryID=1",            # optional
     );
 
 =cut
@@ -1086,8 +1087,9 @@ sub FAQShowQuickSearch {
         $Self->Block(
             Name => 'QuickSearch',
             Data => {
-                Action => $Action,
-                Nav => $Param{Nav} || '',
+                Action         => $Action,
+                Nav            => $Param{Nav} || '',
+                SearchBackLink => $Param{SearchBackLink} || '',
             },
         );
     }

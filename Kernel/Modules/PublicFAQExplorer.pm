@@ -351,12 +351,18 @@ sub Run {
         );
     }
 
+    my $SearchBackLink = "Action=PublicFAQExplorer;CategoryID=$CategoryID";
+
+    # encode back link to Base64 for easy HTML transport
+    $SearchBackLink = MIME::Base64::encode_base64($SearchBackLink);
+
     # show QuickSearch
     $Self->{LayoutObject}->FAQShowQuickSearch(
         Mode            => 'Public',
         Interface       => $Self->{Interface},
         InterfaceStates => $Self->{InterfaceStates},
         UserID          => $Self->{UserID},
+        SearchBackLink  => $SearchBackLink,
     );
 
     # show last added and last updated articles

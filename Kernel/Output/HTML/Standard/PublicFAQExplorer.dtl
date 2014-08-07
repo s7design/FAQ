@@ -45,6 +45,7 @@
                                     <input type="hidden" name="Action" value="$QData{"Action"}"/>
                                     <input type="hidden" name="Subaction" value="Search"/>
                                     <input type="hidden" name="Nav" value="$QData{"Nav"}"/>
+                                    <input type="hidden" name="SearchBackLink" value="$QData{"SearchBackLink"}"/>
                                     <input type="text" name="Fulltext" value="$QData{"Search"}" id="Search" title="$Text{"Search"}"/>
                                     <button type="submit" value="$Text{"Search"}">$Text{"Quick Search"}</button>
                                 </form>
