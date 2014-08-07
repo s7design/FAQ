@@ -77,7 +77,7 @@
 <!-- dtl:block:Record -->
                 <tr title="$QData{"TicketNumber"}">
                     <td class="FAQNumber"><a href="$Env{"Baselink"}Action=PublicFAQZoom;ItemID=$LQData{"FAQID"};ZoomBackLink=$LQData{"ZoomBackLink"};">$QData{"Number"}</a></td>
-                    <td class="Title">$QData{"Title","60"}</td>
+                    <td class="Title" title="$QData{"Title"}">$QData{"CleanedTitle"}</td>
                     <td class="Category">$QData{"CategoryName","60"}</td>
 <!-- dtl:block:RecordLanguage -->
                     <td class="Language">$QData{"Language","5"}</td>
