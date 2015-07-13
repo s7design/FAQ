@@ -1,5 +1,4 @@
 # --
-# Kernel/Output/HTML/LinkObjectFAQ.pm - layout backend module
 # Copyright (C) 2001-2015 OTRS AG, http://otrs.com/
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
@@ -7,7 +6,7 @@
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 
-package Kernel::Output::HTML::LinkObjectFAQ;
+package Kernel::Output::HTML::LinkObject::FAQ;
 
 use strict;
 use warnings;
@@ -18,6 +17,7 @@ our @ObjectDependencies = (
     'Kernel::Config',
     'Kernel::System::Log',
     'Kernel::System::Web::Request',
+    'Kernel::System::State',
 );
 
 =head1 NAME
@@ -49,15 +49,10 @@ sub new {
     my $Self = {};
     bless( $Self, $Type );
 
-    # check needed objects
+    # check needed params
     for my $Needed (qw(UserLanguage UserID)) {
         $Self->{$Needed} = $Param{$Needed} || die "Got no $Needed!";
     }
-
-    # get needed objects
-    $Self->{ConfigObject} = $Kernel::OM->Get('Kernel::Config');
-    $Self->{LogObject}    = $Kernel::OM->Get('Kernel::System::Log');
-    $Self->{ParamObject}  = $Kernel::OM->Get('Kernel::System::Web::Request');
 
     # We need our own LayoutObject instance to avoid blockdata collisions
     #   with the main page.
@@ -158,7 +153,7 @@ sub TableCreateComplex {
 
     # check needed stuff
     if ( !$Param{ObjectLinkListWithData} || ref $Param{ObjectLinkListWithData} ne 'HASH' ) {
-        $Self->{LogObject}->Log(
+        $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
             Message  => 'Need ObjectLinkListWithData!',
         );
@@ -220,7 +215,7 @@ sub TableCreateComplex {
     return if !@ItemList;
 
     # define the block data
-    my $FAQHook = $Self->{ConfigObject}->Get('FAQ::FAQHook');
+    my $FAQHook = $Kernel::OM->Get('Kernel::Config')->Get('FAQ::FAQHook');
     my %Block   = (
         Object    => $Self->{ObjectData}->{Object},
         Blockname => $Self->{ObjectData}->{Realname},
@@ -290,14 +285,14 @@ sub TableCreateSimple {
 
     # check needed stuff
     if ( !$Param{ObjectLinkListWithData} || ref $Param{ObjectLinkListWithData} ne 'HASH' ) {
-        $Self->{LogObject}->Log(
+        $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
             Message  => 'Need ObjectLinkListWithData!',
         );
         return;
     }
 
-    my $FAQHook = $Self->{ConfigObject}->Get('FAQ::FAQHook');
+    my $FAQHook = $Kernel::OM->Get('Kernel::Config')->Get('FAQ::FAQHook');
     my %LinkOutputData;
     for my $LinkType ( sort keys %{ $Param{ObjectLinkListWithData} } ) {
 
@@ -350,7 +345,7 @@ sub ContentStringCreate {
 
     # check needed stuff
     if ( !$Param{ContentData} ) {
-        $Self->{LogObject}->Log(
+        $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
             Message  => 'Need ContentData!',
         );
@@ -430,7 +425,7 @@ sub SearchOptionList {
     my ( $Self, %Param ) = @_;
 
     # search option list
-    my $FAQHook          = $Self->{ConfigObject}->Get('FAQ::FAQHook');
+    my $FAQHook          = $Kernel::OM->Get('Kernel::Config')->Get('FAQ::FAQHook');
     my @SearchOptionList = (
         {
             Key  => 'Number',
@@ -458,11 +453,14 @@ sub SearchOptionList {
     ROW:
     for my $Row (@SearchOptionList) {
 
+        # get param object
+        my $ParamObject = $Kernel::OM->Get('Kernel::System::Web::Request');
+
         # prepare text input fields
         if ( $Row->{Type} eq 'Text' ) {
 
             # get form data
-            $Row->{FormData} = $Self->{ParamObject}->GetParam( Param => $Row->{FormKey} );
+            $Row->{FormData} = $ParamObject->GetParam( Param => $Row->{FormKey} );
 
             # parse the input text block
             $Self->{LayoutObject}->Block(
@@ -485,14 +483,14 @@ sub SearchOptionList {
         if ( $Row->{Type} eq 'List' ) {
 
             # get form data
-            my @FormData = $Self->{ParamObject}->GetArray( Param => $Row->{FormKey} );
+            my @FormData = $ParamObject->GetArray( Param => $Row->{FormKey} );
             $Row->{FormData} = \@FormData;
 
             my %ListData;
             if ( $Row->{Key} eq 'StateIDs' ) {
 
                 # get state list
-                %ListData = $Self->{StateObject}->StateList(
+                %ListData = $Kernel::OM->Get('Kernel::System::State')->StateList(
                     UserID => $Self->{UserID},
                 );
             }

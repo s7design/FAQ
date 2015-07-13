@@ -1,5 +1,4 @@
 # --
-# Kernel/Output/HTML/FAQMenuGeneric.pm
 # Copyright (C) 2001-2015 OTRS AG, http://otrs.com/
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
@@ -7,10 +6,12 @@
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 
-package Kernel::Output::HTML::FAQMenuGeneric;
+package Kernel::Output::HTML::FAQ::MenuGeneric;
 
 use strict;
 use warnings;
+
+our $ObjectManagerDisabled = 1;
 
 sub new {
     my ( $Type, %Param ) = @_;
@@ -19,13 +20,8 @@ sub new {
     my $Self = {};
     bless( $Self, $Type );
 
-    # check needed objects
-    for my $Object (
-        qw(ConfigObject EncodeObject LogObject DBObject LayoutObject FAQObject UserID)
-        )
-    {
-        $Self->{$Object} = $Param{$Object} || die "Got no $Object!";
-    }
+    # get UserID param
+    $Self->{UserID} = $Param{UserID} || die "Got no UserID!";
 
     return $Self;
 }
@@ -35,7 +31,7 @@ sub Run {
 
     # check needed stuff
     if ( !$Param{FAQItem} ) {
-        $Self->{LogObject}->Log(
+        $Kernel::OM->Get('Kernel::System::Log')->Log(
             Priority => 'error',
             Message  => 'Need FAQItem!',
         );
@@ -53,8 +49,15 @@ sub Run {
         # As a workaround we hardcore that AgentLinkObject is treated like AgentFAQEdit
         $Action = 'AgentFAQEdit';
     }
-    my $GroupsRo = $Self->{ConfigObject}->Get('Frontend::Module')->{$Action}->{GroupRo} || [];
-    my $GroupsRw = $Self->{ConfigObject}->Get('Frontend::Module')->{$Action}->{Group}   || [];
+
+    # get config object
+    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
+
+    my $GroupsRo = $ConfigObject->Get('Frontend::Module')->{$Action}->{GroupRo} || [];
+    my $GroupsRw = $ConfigObject->Get('Frontend::Module')->{$Action}->{Group}   || [];
+
+    # get layout object
+    my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
 
     # check permission
     if ( $Action && ( @{$GroupsRo} || @{$GroupsRw} ) ) {
@@ -66,8 +69,8 @@ sub Run {
         ROGROUP:
         for my $RoGroup ( @{$GroupsRo} ) {
 
-            next ROGROUP if !$Self->{LayoutObject}->{"UserIsGroupRo[$RoGroup]"};
-            next ROGROUP if $Self->{LayoutObject}->{"UserIsGroupRo[$RoGroup]"} ne 'Yes';
+            next ROGROUP if !$LayoutObject->{"UserIsGroupRo[$RoGroup]"};
+            next ROGROUP if $LayoutObject->{"UserIsGroupRo[$RoGroup]"} ne 'Yes';
 
             # set access
             $Access = 1;
@@ -78,8 +81,8 @@ sub Run {
         RWGROUP:
         for my $RwGroup ( @{$GroupsRw} ) {
 
-            next RWGROUP if !$Self->{LayoutObject}->{"UserIsGroup[$RwGroup]"};
-            next RWGROUP if $Self->{LayoutObject}->{"UserIsGroup[$RwGroup]"} ne 'Yes';
+            next RWGROUP if !$LayoutObject->{"UserIsGroup[$RwGroup]"};
+            next RWGROUP if $LayoutObject->{"UserIsGroup[$RwGroup]"} ne 'Yes';
 
             # set access
             $Access = 1;
@@ -90,7 +93,7 @@ sub Run {
     return $Param{Counter} if !$Access;
 
     # output menu item
-    $Self->{LayoutObject}->Block(
+    $LayoutObject->Block(
         Name => 'MenuItem',
         Data => {
             %Param,
@@ -103,7 +106,7 @@ sub Run {
     if ( $Param{Config}->{DialogTitle} ) {
 
         # output confirmation dialog
-        $Self->{LayoutObject}->Block(
+        $LayoutObject->Block(
             Name => 'ShowConfirmationDialog',
             Data => {
                 %Param,
