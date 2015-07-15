@@ -112,12 +112,6 @@ sub Run {
     # generate PDF output
     my $PrintedBy = $LayoutObject->{LanguageObject}->Translate('printed by');
     my $Time      = $LayoutObject->{Time};
-    my $Url       = ' ';
-    if ( $ENV{REQUEST_URI} ) {
-        $Url = $ConfigObject->Get('HttpType') . '://'
-            . $ConfigObject->Get('FQDN')
-            . $ENV{REQUEST_URI};
-    }
     my %Page;
 
     # get maximum number of pages
@@ -138,15 +132,13 @@ sub Run {
     $Page{MarginBottom}  = 40;
     $Page{MarginLeft}    = 40;
     $Page{HeaderRight}   = $HeaderRight;
-    $Page{HeadlineLeft}  = $HeadlineLeft;
     $Page{HeadlineRight} = $PrintedBy . ' '
         . $Self->{UserFirstname} . ' '
         . $Self->{UserLastname} . ' ('
         . $Self->{UserEmail} . ') '
         . $Time;
-    $Page{FooterLeft} = $Url;
-    $Page{PageText}   = $LayoutObject->{LanguageObject}->Translate('Page');
-    $Page{PageCount}  = 1;
+    $Page{PageText}  = $LayoutObject->{LanguageObject}->Translate('Page');
+    $Page{PageCount} = 1;
 
     # create new PDF document
     $PDFObject->DocumentNew(
@@ -160,6 +152,38 @@ sub Run {
         FooterRight => $Page{PageText} . ' ' . $Page{PageCount},
     );
     $Page{PageCount}++;
+
+    $PDFObject->PositionSet(
+        Move => 'relativ',
+        Y    => -6,
+    );
+
+    # output headline
+    $PDFObject->Text(
+        Text     => $FAQData{Title},
+        FontSize => 13,
+
+    );
+
+    $PDFObject->PositionSet(
+        Move => 'relativ',
+        Y    => -6,
+    );
+
+    # output "printed by"
+    $PDFObject->Text(
+        Text => $PrintedBy . ' '
+            . $Self->{UserFirstname} . ' '
+            . $Self->{UserLastname} . ' ('
+            . $Self->{UserEmail} . ')'
+            . ', ' . $Time,
+        FontSize => 9,
+    );
+
+    $PDFObject->PositionSet(
+        Move => 'relativ',
+        Y    => -14,
+    );
 
     # type of print tag
     my $PrintTag = $LayoutObject->{LanguageObject}->Translate('FAQ Article Print');
@@ -328,8 +352,7 @@ sub _PDFOutputFAQHeaderInfo {
     $TableParam{Type}                = 'Cut';
     $TableParam{Border}              = 0;
     $TableParam{FontSize}            = 6;
-    $TableParam{BackgroundColorEven} = '#AAAAAA';
-    $TableParam{BackgroundColorOdd}  = '#DDDDDD';
+    $TableParam{BackgroundColorEven} = '#DDDDDD';
     $TableParam{Padding}             = 1;
     $TableParam{PaddingTop}          = 3;
     $TableParam{PaddingBottom}       = 3;

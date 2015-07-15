@@ -22,6 +22,35 @@ sub new {
     my $Self = {%Param};
     bless( $Self, $Type );
 
+    # get config for frontend
+    $Self->{Config} = $Kernel::OM->Get('Kernel::Config')->Get("FAQ::Frontend::$Self->{Action}");
+
+    # get dynamic field config for frontend module
+    my $DynamicFieldFilter = $Self->{Config}->{DynamicField};
+
+    # get the dynamic fields for FAQ object
+    $Self->{DynamicField} = $Kernel::OM->Get('Kernel::System::DynamicField')->DynamicFieldListGet(
+        Valid       => 1,
+        ObjectType  => 'FAQ',
+        FieldFilter => $DynamicFieldFilter || {},
+    );
+
+    # reduce the dynamic fields to only the ones that are designed for customer interface
+    my @CustomerDynamicFields;
+    DYNAMICFIELD:
+    for my $DynamicFieldConfig ( @{ $Self->{DynamicField} } ) {
+        next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
+
+        my $IsCustomerInterfaceCapable = $Kernel::OM->Get('Kernel::System::DynamicField::Backend')->HasBehavior(
+            DynamicFieldConfig => $DynamicFieldConfig,
+            Behavior           => 'IsCustomerInterfaceCapable',
+        );
+        next DYNAMICFIELD if !$IsCustomerInterfaceCapable;
+
+        push @CustomerDynamicFields, $DynamicFieldConfig;
+    }
+    $Self->{DynamicField} = \@CustomerDynamicFields;
+
     return $Self;
 }
 
@@ -30,12 +59,11 @@ sub Run {
 
     my $Output;
 
-    # get needed objects
-    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
-    my $ParamObject  = $Kernel::OM->Get('Kernel::System::Web::Request');
+    # get config from constructor
+    my $Config = $Self->{Config};
 
-    # get config for frontend
-    my $Config = $ConfigObject->Get("FAQ::Frontend::$Self->{Action}");
+    # get param object
+    my $ParamObject = $Kernel::OM->Get('Kernel::System::Web::Request');
 
     # get config data
     my $StartHit = int( $ParamObject->GetParam( Param => 'StartHit' ) || 1 );
@@ -98,40 +126,9 @@ sub Run {
     # get single params
     my %GetParam;
 
-    # get dynamic field config for frontend module
-    my $DynamicFieldFilter = $Config->{DynamicField};
-
-    # get dynamic field object
-    my $DynamicFieldObject = $Kernel::OM->Get('Kernel::System::DynamicField');
-
-    # get the dynamic fields for FAQ object
-    my $DynamicField = $DynamicFieldObject->DynamicFieldListGet(
-        Valid       => 1,
-        ObjectType  => 'FAQ',
-        FieldFilter => $DynamicFieldFilter || {},
-    );
-
-    # get dynamic field backend object
+    # get needed object
     my $DynamicFieldBackendObject = $Kernel::OM->Get('Kernel::System::DynamicField::Backend');
-
-    # reduce the dynamic fields to only the ones that are designed for customer interface
-    my @CustomerDynamicFields;
-    DYNAMICFIELD:
-    for my $DynamicFieldConfig ( @{$DynamicField} ) {
-        next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
-
-        my $IsCustomerInterfaceCapable = $DynamicFieldBackendObject->HasBehavior(
-            DynamicFieldConfig => $DynamicFieldConfig,
-            Behavior           => 'IsCustomerInterfaceCapable',
-        );
-        next DYNAMICFIELD if !$IsCustomerInterfaceCapable;
-
-        push @CustomerDynamicFields, $DynamicFieldConfig;
-    }
-    $DynamicField = \@CustomerDynamicFields;
-
-    # get search profile object
-    my $SearchProfileObject = $Kernel::OM->Get('Kernel::System::SearchProfile');
+    my $SearchProfileObject       = $Kernel::OM->Get('Kernel::System::SearchProfile');
 
     # load profiles string params (press load profile)
     if ( ( $Self->{Subaction} eq 'LoadProfile' && $Profile ) || $TakeLastSearch ) {
@@ -180,7 +177,7 @@ sub Run {
         # get Dynamic fields form param object
         # cycle through the activated Dynamic Fields for this screen
         DYNAMICFIELD:
-        for my $DynamicFieldConfig ( @{$DynamicField} ) {
+        for my $DynamicFieldConfig ( @{ $Self->{DynamicField} } ) {
             next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
 
             # get search field preferences
@@ -267,6 +264,12 @@ sub Run {
         );
     }
 
+    # get config object
+    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
+
+    # get default multi language option
+    my $MultiLanguage = $ConfigObject->Get('FAQ::MultiLanguage');
+
     # show result page
     if ( $Self->{Subaction} eq 'Search' && !$EraseTemplate ) {
 
@@ -328,7 +331,7 @@ sub Run {
 
         # cycle through the activated Dynamic Fields for this screen
         DYNAMICFIELD:
-        for my $DynamicFieldConfig ( @{$DynamicField} ) {
+        for my $DynamicFieldConfig ( @{ $Self->{DynamicField} } ) {
             next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
 
             # get search field preferences
@@ -506,10 +509,9 @@ sub Run {
             %DynamicFieldSearchParameters,
         );
 
-        # get time object
-        my $TimeObject = $Kernel::OM->Get('Kernel::System::Time');
-
-        my $MultiLanguage = $ConfigObject->Get('FAQ::MultiLanguage');
+        # get needed objects
+        my $DynamicFieldObject = $Kernel::OM->Get('Kernel::System::DynamicField');    # get time object
+        my $TimeObject         = $Kernel::OM->Get('Kernel::System::Time');
 
         # CSV output
         if ( $GetParam{ResultForm} eq 'CSV' ) {
@@ -735,12 +737,6 @@ sub Run {
             my $PrintedBy = $LayoutObject->{LanguageObject}->Translate('printed by');
             my $Page      = $LayoutObject->{LanguageObject}->Translate('Page');
             my $Time      = $LayoutObject->{Time};
-            my $Url       = '';
-            if ( $ENV{REQUEST_URI} ) {
-                $Url = $ConfigObject->Get('HttpType') . '://'
-                    . $ConfigObject->Get('FQDN')
-                    . $ENV{REQUEST_URI};
-            }
 
             # get maximum number of pages
             my $MaxPages = $ConfigObject->Get('PDF::MaxPages');
@@ -749,6 +745,8 @@ sub Run {
             }
 
             my $CellData;
+
+            # output 'No Result', if no content was given
             if (@PDFData) {
 
                 # create the header
@@ -788,8 +786,6 @@ sub Run {
                 }
             }
             else {
-
-                # output 'No Result', if no content was given
                 $CellData->[0]->[0]->{Content} = $LayoutObject->{LanguageObject}->Translate('No Result!');
             }
 
@@ -801,13 +797,6 @@ sub Run {
             $PageParam{MarginBottom}    = 40;
             $PageParam{MarginLeft}      = 40;
             $PageParam{HeaderRight}     = $Title;
-            $PageParam{FooterLeft}      = $Url;
-            $PageParam{HeadlineLeft}    = $Title;
-            $PageParam{HeadlineRight}   = $PrintedBy . ' '
-                . $Self->{UserFirstname} . ' '
-                . $Self->{UserLastname} . ' ('
-                . $Self->{UserEmail} . ') '
-                . $Time;
 
             # table params
             my %TableParam;
@@ -815,8 +804,7 @@ sub Run {
             $TableParam{Type}                = 'Cut';
             $TableParam{FontSize}            = 6;
             $TableParam{Border}              = 0;
-            $TableParam{BackgroundColorEven} = '#AAAAAA';
-            $TableParam{BackgroundColorOdd}  = '#DDDDDD';
+            $TableParam{BackgroundColorEven} = '#DDDDDD';
             $TableParam{Padding}             = 1;
             $TableParam{PaddingTop}          = 3;
             $TableParam{PaddingBottom}       = 3;
@@ -832,6 +820,38 @@ sub Run {
                 %PageParam,
                 FooterRight => $Page . ' 1',
             );
+
+            $PDFObject->PositionSet(
+                Move => 'relativ',
+                Y    => -6,
+            );
+
+            # output title
+            $PDFObject->Text(
+                Text     => $Title,
+                FontSize => 13,
+            );
+
+            $PDFObject->PositionSet(
+                Move => 'relativ',
+                Y    => -6,
+            );
+
+            # output "printed by"
+            $PDFObject->Text(
+                Text => $PrintedBy . ' '
+                    . $Self->{UserFirstname} . ' '
+                    . $Self->{UserLastname} . ' ('
+                    . $Self->{UserEmail} . ')'
+                    . ', ' . $Time,
+                FontSize => 9,
+            );
+
+            $PDFObject->PositionSet(
+                Move => 'relativ',
+                Y    => -14,
+            );
+
             PAGE:
             for ( 2 .. $MaxPages ) {
 
@@ -1201,7 +1221,7 @@ sub Run {
 
         # cycle through the activated Dynamic Fields for this screen
         DYNAMICFIELD:
-        for my $DynamicFieldConfig ( @{$DynamicField} ) {
+        for my $DynamicFieldConfig ( @{ $Self->{DynamicField} } ) {
             next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
             next DYNAMICFIELD
                 if !$DynamicFieldSearchDisplay{ 'DynamicField_' . $DynamicFieldConfig->{Name} };
@@ -1260,8 +1280,8 @@ sub Run {
 
         # set the SortBy Class to the correct field
         my %CSSSort;
-        my $SortBy = $SortBy . 'Sort';
-        $CSSSort{$SortBy} = $SortClass;
+        my $CSSSortBy = $SortBy . 'Sort';
+        $CSSSort{$CSSSortBy} = $SortClass;
 
         my %NewOrder = (
             Down => 'Up',
@@ -1279,6 +1299,21 @@ sub Run {
                 },
             );
         }
+
+        $Output .= $LayoutObject->Output(
+            TemplateFile => 'CustomerFAQSearchResultShort',
+            Data         => {
+                %Param,
+                %PageNav,
+                %CSSSort,
+                Order   => $NewOrder{$OrderBy},
+                Profile => $Profile,
+            },
+        );
+
+        # build footer
+        $Output .= $LayoutObject->CustomerFooter();
+        return $Output;
     }
 
     # empty search site
@@ -1302,7 +1337,7 @@ sub Run {
 
         # cycle trough the activated Dynamic Fields for this screen
         DYNAMICFIELD:
-        for my $DynamicFieldConfig ( @{$DynamicField} ) {
+        for my $DynamicFieldConfig ( @{ $Self->{DynamicField} } ) {
             next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
 
             # get search field preferences
@@ -1508,46 +1543,14 @@ sub MaskForm {
         Data => {%Param},
     );
 
-    # get config for frontend
-    my $Config = $ConfigObject->Get("FAQ::Frontend::$Self->{Action}");
-
-    # get dynamic field config for frontend module
-    my $DynamicFieldFilter = $Config->{DynamicField};
-
-    # get the dynamic fields for FAQ object
-    my $DynamicField = $Kernel::OM->Get('Kernel::System::DynamicField')->DynamicFieldListGet(
-        Valid       => 1,
-        ObjectType  => 'FAQ',
-        FieldFilter => $DynamicFieldFilter || {},
-    );
-
-    # get dynamic field backend object
-    my $DynamicFieldBackendObject = $Kernel::OM->Get('Kernel::System::DynamicField::Backend');
-
-    # reduce the dynamic fields to only the ones that are designed for customer interface
-    my @CustomerDynamicFields;
-    DYNAMICFIELD:
-    for my $DynamicFieldConfig ( @{$DynamicField} ) {
-        next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
-
-        my $IsCustomerInterfaceCapable = $DynamicFieldBackendObject->HasBehavior(
-            DynamicFieldConfig => $DynamicFieldConfig,
-            Behavior           => 'IsCustomerInterfaceCapable',
-        );
-        next DYNAMICFIELD if !$IsCustomerInterfaceCapable;
-
-        push @CustomerDynamicFields, $DynamicFieldConfig;
-    }
-    $DynamicField = \@CustomerDynamicFields;
-
     # output Dynamic fields blocks
     # cycle through the activated Dynamic Fields for this screen
     DYNAMICFIELD:
-    for my $DynamicFieldConfig ( @{$DynamicField} ) {
+    for my $DynamicFieldConfig ( @{ $Self->{DynamicField} } ) {
         next DYNAMICFIELD if !IsHashRefWithData($DynamicFieldConfig);
 
         # get search field preferences
-        my $SearchFieldPreferences = $DynamicFieldBackendObject->SearchFieldPreferences(
+        my $SearchFieldPreferences = $Kernel::OM->Get('Kernel::System::DynamicField::Backend')->SearchFieldPreferences(
             DynamicFieldConfig => $DynamicFieldConfig,
         );
 
@@ -1573,8 +1576,10 @@ sub MaskForm {
         }
     }
 
-    # show languages select
+    # get default multi language option
     my $MultiLanguage = $ConfigObject->Get('FAQ::MultiLanguage');
+
+    # show languages select
     if ($MultiLanguage) {
         $LayoutObject->Block(
             Name => 'Language',
