@@ -791,12 +791,6 @@ sub Run {
             my $PrintedBy = $LayoutObject->{LanguageObject}->Translate('printed by');
             my $Page      = $LayoutObject->{LanguageObject}->Translate('Page');
             my $Time      = $LayoutObject->{Time};
-            my $Url       = '';
-            if ( $ENV{REQUEST_URI} ) {
-                $Url = $ConfigObject->Get('HttpType') . '://'
-                    . $ConfigObject->Get('FQDN')
-                    . $ENV{REQUEST_URI};
-            }
 
             # get maximum number of pages
             my $MaxPages = $ConfigObject->Get('PDF::MaxPages');
@@ -807,34 +801,35 @@ sub Run {
             # create the header
             my $CellData;
 
-            $CellData->[0]->[0]->{Content} = $ConfigObject->Get('FAQ::FAQHook');
-            $CellData->[0]->[0]->{Font}    = 'ProportionalBold';
-            $CellData->[0]->[1]->{Content} = $LayoutObject->{LanguageObject}->Translate('Title');
-            $CellData->[0]->[1]->{Font}    = 'ProportionalBold';
-            $CellData->[0]->[2]->{Content} = $LayoutObject->{LanguageObject}->Translate('Category');
-            $CellData->[0]->[2]->{Font}    = 'ProportionalBold';
-
-            # store the correct header index
-            my $NextHeaderIndex = 3;
-
-            # add language header
-            if ($MultiLanguage) {
-                $CellData->[0]->[3]->{Content} = $LayoutObject->{LanguageObject}->Translate('Language');
-                $CellData->[0]->[3]->{Font}    = 'ProportionalBold';
-                $NextHeaderIndex               = 4;
-            }
-
-            $CellData->[0]->[$NextHeaderIndex]->{Content} = $LayoutObject->{LanguageObject}->Translate('State');
-            $CellData->[0]->[$NextHeaderIndex]->{Font}    = 'ProportionalBold';
-
-            $CellData->[0]->[ $NextHeaderIndex + 1 ]->{Content} = $LayoutObject->{LanguageObject}->Translate('Changed');
-            $CellData->[0]->[ $NextHeaderIndex + 1 ]->{Font}    = 'ProportionalBold';
-
             # output 'No Result', if no content was given
-            my $CounterRow = 1;
             if (@PDFData) {
 
+                $CellData->[0]->[0]->{Content} = $ConfigObject->Get('FAQ::FAQHook');
+                $CellData->[0]->[0]->{Font}    = 'ProportionalBold';
+                $CellData->[0]->[1]->{Content} = $LayoutObject->{LanguageObject}->Translate('Title');
+                $CellData->[0]->[1]->{Font}    = 'ProportionalBold';
+                $CellData->[0]->[2]->{Content} = $LayoutObject->{LanguageObject}->Translate('Category');
+                $CellData->[0]->[2]->{Font}    = 'ProportionalBold';
+
+                # store the correct header index
+                my $NextHeaderIndex = 3;
+
+                # add language header
+                if ($MultiLanguage) {
+                    $CellData->[0]->[3]->{Content} = $LayoutObject->{LanguageObject}->Translate('Language');
+                    $CellData->[0]->[3]->{Font}    = 'ProportionalBold';
+                    $NextHeaderIndex               = 4;
+                }
+
+                $CellData->[0]->[$NextHeaderIndex]->{Content} = $LayoutObject->{LanguageObject}->Translate('State');
+                $CellData->[0]->[$NextHeaderIndex]->{Font}    = 'ProportionalBold';
+
+                $CellData->[0]->[ $NextHeaderIndex + 1 ]->{Content}
+                    = $LayoutObject->{LanguageObject}->Translate('Changed');
+                $CellData->[0]->[ $NextHeaderIndex + 1 ]->{Font} = 'ProportionalBold';
+
                 # create the content array
+                my $CounterRow = 1;
                 for my $Row (@PDFData) {
                     my $CounterColumn = 0;
                     for my $Content ( @{$Row} ) {
@@ -845,7 +840,7 @@ sub Run {
                 }
             }
             else {
-                $CellData->[$CounterRow]->[0]->{Content} = $LayoutObject->{LanguageObject}->Translate('No Result!');
+                $CellData->[0]->[0]->{Content} = $LayoutObject->{LanguageObject}->Translate('No Result!');
 
             }
 
@@ -857,13 +852,7 @@ sub Run {
             $PageParam{MarginBottom}    = 40;
             $PageParam{MarginLeft}      = 40;
             $PageParam{HeaderRight}     = $Title;
-            $PageParam{FooterLeft}      = $Url;
             $PageParam{HeadlineLeft}    = $Title;
-            $PageParam{HeadlineRight}   = $PrintedBy . ' '
-                . $Self->{UserFirstname} . ' '
-                . $Self->{UserLastname} . ' ('
-                . $Self->{UserEmail} . ') '
-                . $Time;
 
             # table params
             my %TableParam;
@@ -871,8 +860,7 @@ sub Run {
             $TableParam{Type}                = 'Cut';
             $TableParam{FontSize}            = 6;
             $TableParam{Border}              = 0;
-            $TableParam{BackgroundColorEven} = '#AAAAAA';
-            $TableParam{BackgroundColorOdd}  = '#DDDDDD';
+            $TableParam{BackgroundColorEven} = '#DDDDDD';
             $TableParam{Padding}             = 1;
             $TableParam{PaddingTop}          = 3;
             $TableParam{PaddingBottom}       = 3;
@@ -888,6 +876,38 @@ sub Run {
                 %PageParam,
                 FooterRight => $Page . ' 1',
             );
+
+            $PDFObject->PositionSet(
+                Move => 'relativ',
+                Y    => -6,
+            );
+
+            # output title
+            $PDFObject->Text(
+                Text     => $Title,
+                FontSize => 13,
+            );
+
+            $PDFObject->PositionSet(
+                Move => 'relativ',
+                Y    => -6,
+            );
+
+            # output "printed by"
+            $PDFObject->Text(
+                Text => $PrintedBy . ' '
+                    . $Self->{UserFirstname} . ' '
+                    . $Self->{UserLastname} . ' ('
+                    . $Self->{UserEmail} . ')'
+                    . ', ' . $Time,
+                FontSize => 9,
+            );
+
+            $PDFObject->PositionSet(
+                Move => 'relativ',
+                Y    => -14,
+            );
+
             PAGE:
             for ( 2 .. $MaxPages ) {
 
