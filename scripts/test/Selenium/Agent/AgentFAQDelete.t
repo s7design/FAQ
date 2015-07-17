@@ -57,6 +57,7 @@ $Selenium->RunTest(
 
         # click on 'Delete'
         $Selenium->find_element("//a[contains(\@href, \'Action=AgentFAQDelete;ItemID=$FAQID' )]")->click();
+        sleep 3;
 
         # verify delete messsage
         $Self->True(

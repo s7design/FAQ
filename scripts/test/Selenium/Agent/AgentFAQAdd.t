@@ -94,30 +94,37 @@ $Selenium->RunTest(
 
         # switch to FAQ symptom iframe and verify its values
         $Selenium->switch_to_frame('IframeFAQField1');
+        sleep 2;
         $Self->True(
             index( $Selenium->get_page_source(), $FAQSymptom ) > -1,
             "$FAQSymptom - found",
         );
         $Selenium->switch_to_window( $Handles->[0] );
+        sleep 2;
 
         # switch to FAQ problem iframe and verify its values
         $Selenium->switch_to_frame('IframeFAQField2');
+        sleep 2;
         $Self->True(
             index( $Selenium->get_page_source(), $FAQProblem ) > -1,
             "$FAQProblem - found",
         );
         $Selenium->switch_to_window( $Handles->[0] );
+        sleep 2;
 
         # switch to FAQ solution iframe and verify its values
         $Selenium->switch_to_frame('IframeFAQField3');
+        sleep 2;
         $Self->True(
             index( $Selenium->get_page_source(), $FAQSolution ) > -1,
             "$FAQSolution - found",
         );
         $Selenium->switch_to_window( $Handles->[0] );
+        sleep 2;
 
         # switch to FAQ comment iframe and verify its values
         $Selenium->switch_to_frame('IframeFAQField6');
+        sleep 2;
         $Self->True(
             index( $Selenium->get_page_source(), $FAQComment ) > -1,
             "$FAQComment - found",

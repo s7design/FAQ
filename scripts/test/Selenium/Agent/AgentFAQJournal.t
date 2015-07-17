@@ -67,10 +67,10 @@ $Selenium->RunTest(
         $Selenium->find_element("//div[\@title='$FAQTitle']")->click();
 
         # verify we are in AgentFAQZoom screen
-        my $URLAction = substr $Selenium->get_current_url(), -29;
+        my $URLAction = $Selenium->get_current_url();
         $Self->Is(
-            $URLAction,
-            "Action=AgentFAQZoom;ItemID=$FAQID",
+            index( $URLAction, "Action=AgentFAQZoom;ItemID=$FAQID" ) > -1,
+            1,
             "Link from Journal to Zoom view - success",
         );
 
