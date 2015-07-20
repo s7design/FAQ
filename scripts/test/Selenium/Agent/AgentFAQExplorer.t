@@ -84,9 +84,6 @@ $Selenium->RunTest(
             {
                 ScreenData => 'Latest created FAQ articles',
             },
-            {
-                ScreenData => 'Top 10 FAQ articles',
-            },
         );
 
         # delete test created FAQs
