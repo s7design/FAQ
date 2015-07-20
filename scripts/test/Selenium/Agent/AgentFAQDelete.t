@@ -57,7 +57,7 @@ $Selenium->RunTest(
 
         # click on 'Delete'
         $Selenium->find_element("//a[contains(\@href, \'Action=AgentFAQDelete;ItemID=$FAQID' )]")->click();
-        sleep 3;
+        $Selenium->WaitFor( JavaScript => 'return $("#DialogButton1").length' );
 
         # verify delete messsage
         $Self->True(
