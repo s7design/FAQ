@@ -1,5 +1,4 @@
 # --
-# Kernel/System/Console/Command/Admin/FAQ/Import.pm - console command
 # Copyright (C) 2001-2015 OTRS AG, http://otrs.com/
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
@@ -15,6 +14,11 @@ use warnings;
 use base qw(Kernel::System::Console::BaseCommand);
 
 our @ObjectDependencies = (
+    'Kernel::System::CSV',
+    'Kernel::System::DB',
+    'Kernel::System::FAQ',
+    'Kernel::System::Group',
+    'Kernel::System::Main',
 );
 
 sub Configure {
@@ -42,9 +46,11 @@ sub Configure {
         ValueRegex  => qr/.*/smx,
     );
 
-    $Self->AdditionalHelp("<yellow>Format of the CSV file:\n
+    $Self->AdditionalHelp(
+        "<yellow>Format of the CSV file:\n
         \"title\";\"category\";\"language\";\"statetype\";\"field1\";\"field2\";\"field3\";\"field4\";\"field5\";\"field6\";\"keywords\"
-        </yellow>\n");
+        </yellow>\n"
+    );
 
     return;
 }
@@ -76,13 +82,13 @@ sub Run {
         Mode     => 'binmode',
     );
 
-    if ( !$CSVStringRef ){
+    if ( !$CSVStringRef ) {
         $Self->PrintError("Can't read file $SourcePath.\nImport aborted.\n");
         return $Self->ExitCodeError();
     }
 
     my $Separator = $Self->GetOption('separator') || ';';
-    my $Quote = $Self->GetOption('quote') || '';
+    my $Quote     = $Self->GetOption('quote')     || '';
 
     # read CSV data
     my $DataRef = $Kernel::OM->Get('Kernel::System::CSV')->CSV2Array(
@@ -91,7 +97,7 @@ sub Run {
         Quote     => $Quote,
     );
 
-    if ( !$DataRef ){
+    if ( !$DataRef ) {
         $Self->PrintError("Error occurred. Import impossible! See Syslog for details.\n");
         return $Self->ExitCodeError();
     }
@@ -184,7 +190,9 @@ sub Run {
 
         # check category
         if ( !$CategoryID ) {
-            $Self->PrintError("Error: Could not import line $LineCounter. Category '$CategoryString' could not be created.\n");
+            $Self->PrintError(
+                "Error: Could not import line $LineCounter. Category '$CategoryString' could not be created.\n"
+            );
             next ROW;
         }
 
@@ -218,15 +226,15 @@ sub Run {
         );
 
         # check success
-        if ( $FAQID ) {
+        if ($FAQID) {
             $SuccessCount++;
         }
-        else{
+        else {
             $Self->PrintError("Error: Could not import line $LineCounter.\n");
         }
     }
 
-    if( $SuccessCount ){
+    if ($SuccessCount) {
         $Self->Print("<green>Successfully imported $SuccessCount FAQ item(s).</green>\n\n");
     }
 
@@ -236,7 +244,6 @@ sub Run {
 
     return $Self->ExitCodeOk();
 }
-
 
 1;
 

@@ -1,5 +1,4 @@
 # --
-# Admin/FAQ/Import.t - command tests
 # Copyright (C) 2001-2015 OTRS AG, http://otrs.com/
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
@@ -25,8 +24,7 @@ $Self->Is(
     "Option - without source argument",
 );
 
-my $SourcePath
-    = $Kernel::OM->Get('Kernel::Config')->Get('Home') . "/scripts/test/sample/FAQ.csv";
+my $SourcePath = $Kernel::OM->Get('Kernel::Config')->Get('Home') . "/scripts/test/sample/FAQ.csv";
 
 # test command with source argument
 $ExitCode = $CommandObject->Execute( '--separator', ';', '--quote', '', $SourcePath );
