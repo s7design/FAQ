@@ -27,7 +27,7 @@ sub Configure {
     $Self->Description('FAQ import tool.');
     $Self->AddOption(
         Name        => 'separator',
-        Description => "Defines the separator for data in CSV file (default ',').",
+        Description => "Defines the separator for data in CSV file (default ';').",
         Required    => 0,
         HasValue    => 1,
         ValueRegex  => qr/.*/smx,
@@ -48,7 +48,7 @@ sub Configure {
 
     $Self->AdditionalHelp(
         "<yellow>Format of the CSV file:\n
-        \"title\";\"category\";\"language\";\"statetype\";\"field1\";\"field2\";\"field3\";\"field4\";\"field5\";\"field6\";\"keywords\"
+            title;category;language;statetype;field1;field2;field3;field4;field5;field6;keywords
         </yellow>\n"
     );
 
