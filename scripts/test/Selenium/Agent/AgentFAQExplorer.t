@@ -103,7 +103,7 @@ $Selenium->RunTest(
         # check and delete test created FAQs
         for my $FAQ (@FAQIDs) {
 
-            # check if there is test on screen
+            # check if there is test FAQ on screen
             $Self->True(
                 index( $Selenium->get_page_source(), $FAQ->{FAQTitle} ) > -1,
                 "$FAQ->{FAQTitle} - found",
