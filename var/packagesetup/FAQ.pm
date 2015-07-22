@@ -856,7 +856,7 @@ sub _MigrateConfigs {
         );
     }
 
-    # migrate FAQ search config
+    # migrate FAQ config items
     my @Configs = (
         {
             Name       => 'Frontend::HeaderMetaModule',
