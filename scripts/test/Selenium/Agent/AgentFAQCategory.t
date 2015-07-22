@@ -88,6 +88,9 @@ $Selenium->RunTest(
         $Selenium->find_element( "#DeleteCategoryID$CategoryID", 'css' )->click();
         $Selenium->find_element( "#DialogButton1",               'css' )->click();
 
+        # wait until delete dialog has closed
+        $Selenium->WaitFor( JavaScript => "return !\$('#DialogButton1').length" );
+
         # verify test created category is deleted
         $Self->True(
             index( $Selenium->get_page_source(), $CategoryName ) == -1,
