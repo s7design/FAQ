@@ -181,7 +181,7 @@ $Selenium->RunTest(
         $Selenium->find_element("//a[contains(\@href, \'Action=CustomerFAQSearch;Subaction=LoadProfile' )]")->click();
 
         $Selenium->find_element( "#Title",  'css' )->clear();
-        $Selenium->find_element( "#Title",  'css' )->send_keys('FAQChangeSearch*');
+        $Selenium->find_element( "#Title",  'css' )->send_keys( $Helper->GetRandomID() );
         $Selenium->find_element( "#Submit", 'css' )->click();
 
         # wait until form has loaded, if neccessary
