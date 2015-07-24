@@ -266,15 +266,15 @@ sub CodeUpgradeFromLowerThan_4_0_1 {    ## no critic
     return 1;
 }
 
-=item CodeUpgradeFromLowerThan_4_0_2()
+=item CodeUpgradeFromLowerThan_4_0_91()
 
-This function is only executed if the installed module version is smaller than 4.0.2.
+This function is only executed if the installed module version is smaller than 4.0.91.
 
-my $Result = $CodeObject->CodeUpgradeFromLowerThan_4_0_2();
+my $Result = $CodeObject->CodeUpgradeFromLowerThan_4_0_91();
 
 =cut
 
-sub CodeUpgradeFromLowerThan_4_0_2 {    ## no critic
+sub CodeUpgradeFromLowerThan_4_0_91 {    ## no critic
     my ( $Self, %Param ) = @_;
 
     # change configurations to match the new module location.
@@ -861,22 +861,22 @@ sub _MigrateConfigs {
         {
             Name       => 'Frontend::HeaderMetaModule',
             ConfigItem => '3-FAQSearch',
-            Module     => 'Kernel::Output::HTML::HeaderMeta::FAQSearch',
+            Module     => 'Kernel::Output::HTML::HeaderMeta::AgentFAQSearch',
         },
         {
             Name       => 'CustomerFrontend::HeaderMetaModule',
             ConfigItem => '3-FAQSearch',
-            Module     => 'Kernel::Output::HTML::CustomerHeaderMeta::FAQSearch',
+            Module     => 'Kernel::Output::HTML::HeaderMeta::CustomerFAQSearch',
         },
         {
             Name       => 'PublicFrontend::HeaderMetaModule',
             ConfigItem => '3-FAQSearch',
-            Module     => 'Kernel::Output::HTML::PublicHeaderMeta::FAQSearch',
+            Module     => 'Kernel::Output::HTML::HeaderMeta::PublicFAQSearch',
         },
         {
             Name       => 'Frontend::Output::FilterElementPost',
             ConfigItem => 'FAQ',
-            Module     => 'Kernel::Output::HTML::OutputFilter::FAQ',
+            Module     => 'Kernel::Output::HTML::FilterElementPost::FAQ',
         },
         {
             Name       => 'FAQ::Frontend::Overview',
