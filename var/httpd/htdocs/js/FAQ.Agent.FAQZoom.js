@@ -1,5 +1,4 @@
 // --
-// FAQ.Agent.FAQZoom.js - provides the special module functions for FAQZoom
 // Copyright (C) 2001-2012 OTRS AG, http://otrs.org/
 // --
 // This software comes with ABSOLUTELY NO WARRANTY. For details, see
@@ -21,18 +20,21 @@ FAQ.Agent = FAQ.Agent || {};
 FAQ.Agent.FAQZoom = (function (TargetNS) {
 
     /**
+     * @name IframeAutoHeight
+     * @memberof FAQ.Agent.FAQZoom
      * @function
-     * @param {jQueryObject} $Iframe The iframe which should be auto-heighted
-     * @return nothing
-     *      This function initializes the special module functions
+     * @param {jQueryObject} $Iframe - The iframe which should be auto-heighted
+     * @description
+     *      Set iframe height automatically based on real content height and default config setting.
      */
     TargetNS.IframeAutoHeight = function ($Iframe) {
 
+        var NewHeight = $Iframe
+            .contents()
+            .find('html')
+            .height();
+
         if (isJQueryObject($Iframe)) {
-            var NewHeight = $Iframe
-                .contents()
-                .find('html')
-                .height();
 
             // IE8 needs some more space due to incorrect height calculation
             if (NewHeight > 0 && $.browser.msie && $.browser.version === '8.0') {
