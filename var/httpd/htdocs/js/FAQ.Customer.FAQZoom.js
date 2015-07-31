@@ -8,7 +8,7 @@
 
 "use strict";
 
-var FAQ = FAQ || {};
+var FAQ = FAQ || {}, Core = Core || {};
 FAQ.Customer = FAQ.Customer || {};
 
 /**
