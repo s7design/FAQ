@@ -493,7 +493,7 @@ sub Run {
         # Values are the Category names.
 
         my $UserCatGroup = $FAQObject->GetUserCategories(
-            Type   => 'rw',
+            Type   => 'ro',
             UserID => $Self->{UserID},
         );
 
