@@ -37,7 +37,7 @@ $Selenium->RunTest(
             ContentType => 'text/html',
         );
         $Self->True(
-            $Success,
+            $FAQID,
             "FAQ item is created - ID $FAQID",
         );
 
