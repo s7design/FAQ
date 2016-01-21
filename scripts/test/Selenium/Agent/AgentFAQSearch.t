@@ -99,6 +99,9 @@ $Selenium->RunTest(
         # navigate to AgentFAQSearch form
         $Selenium->VerifiedGet("${ScriptAlias}index.pl?Action=AgentFAQSearch");
 
+        # wait until form has loaded, if necessary
+        $Selenium->WaitFor( JavaScript => "return \$('#SearchProfile').length" );
+
         # check ticket search page
         for my $ID (
             qw(SearchProfile SearchProfileNew Attribute ResultForm SearchFormSubmit)

@@ -68,7 +68,7 @@ $Selenium->RunTest(
         my $ScriptAlias = $Kernel::OM->Get('Kernel::Config')->Get('ScriptAlias');
 
         # navigate to AgentFAQPrint screen of created test FAQ
-        $Selenium->VerifiedGet("${ScriptAlias}index.pl?Action=AgentFAQPrint;ItemID=$FAQID");
+        $Selenium->get("${ScriptAlias}index.pl?Action=AgentFAQPrint;ItemID=$FAQID");
 
         # wait until print screen is loaded
         ACTIVESLEEP:
