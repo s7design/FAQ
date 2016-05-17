@@ -12,15 +12,13 @@ use warnings;
 
 use vars qw($Self);
 
-use Kernel::System::FAQ;
-
+# get needed objects
 $Kernel::OM->ObjectParamAdd(
     'Kernel::System::UnitTest::Helper' => {
         RestoreDatabase => 1,
     },
 );
-my $Helper = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
-
+my $Helper      = $Kernel::OM->Get('Kernel::System::UnitTest::Helper');
 my $FAQObject   = $Kernel::OM->Get('Kernel::System::FAQ');
 my $CacheObject = $Kernel::OM->Get('Kernel::System::Cache');
 
@@ -1000,63 +998,6 @@ for my $Test (@Tests) {
     }
 }
 
-%FAQData = $FAQObject->FAQGet(
-    ItemID => $FAQItemID1,
-    UserID => 1,
-);
-$FAQUpdate = $FAQObject->FAQUpdate(
-    %FAQData,
-    ItemID  => $FAQItemID1,
-    ValidID => 2,
-    UserID  => 1,
-);
-$Self->True(
-    $FAQUpdate,
-    "FAQUpdate() set FAQ $FAQItemID1 to invalid",
-);
-
-my $InterfaceStates = $FAQObject->StateTypeList(
-    Types  => $Kernel::OM->Get('Kernel::Config')->Get('FAQ::Agent::StateTypes'),
-    UserID => 1,
-);
-
-my $ArticleCount = $FAQObject->FAQCount(
-    CategoryIDs => [ 1, ],
-    ItemStates  => $InterfaceStates,
-    Valid       => 0,
-    UserID      => 1,
-);
-$Self->IsNot(
-    $ArticleCount,
-    0,
-    "FAQCount() Valid and Invalid",
-);
-
-my $ArticleCountValid = $FAQObject->FAQCount(
-    CategoryIDs => [ 1, ],
-    ItemStates  => $InterfaceStates,
-    Valid       => 1,
-    UserID      => 1,
-);
-$Self->IsNot(
-    $ArticleCountValid,
-    0,
-    "FAQCount() Valid",
-);
-
-$Self->True(
-    $ArticleCountValid < $ArticleCount ? 1 : 0,
-    "Valid Items are less than Valid and Invalid ($ArticleCountValid < $ArticleCount) with true",
-);
-
-$FAQDelete = $FAQObject->FAQDelete(
-    ItemID => $FAQItemID1,
-    UserID => 1,
-);
-
-$Self->True(
-    $FAQDelete,
-    "FAQDelete(): with True ($FAQItemID1)",
-);
+# cleanup is done by restore database
 
 1;
