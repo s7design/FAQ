@@ -197,11 +197,19 @@ sub Run {
     );
 
     # get all items (valid and invalid) if SySConfig is set
-    my $ValidIDs;
+    my $ValidObject = $Kernel::OM->Get('Kernel::System::Valid');
+    my @ValidIDs;
     my $Valid = 1;
     if ( $Config->{ShowInvalidFAQItems} ) {
-        $ValidIDs = keys { $Kernel::OM->Get('Kernel::System::Valid')->ValidList() };
+        @ValidIDs = keys { $ValidObject->ValidList() };
         $Valid = 0;
+    }
+    else {
+        @ValidIDs = (
+            $ValidObject->ValidLookup(
+                Valid => 'valid',
+            )
+            )
     }
 
     # check if there are subcategories
@@ -258,7 +266,7 @@ sub Run {
         States           => $InterfaceStates,
         Interface        => $Interface,
         CategoryIDs      => [$CategoryID],
-        ValidIDs         => $ValidIDs,
+        ValidIDs         => \@ValidIDs,
     );
 
     # build necessary stuff for the FAQ article list
