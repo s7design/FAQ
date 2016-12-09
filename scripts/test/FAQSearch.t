@@ -916,6 +916,34 @@ $Self->True(
         "FAQAdd() - 2",
     );
 
+    my $FAQID3 = $FAQObject->FAQAdd(
+        Title       => 'Test FAQ-3',
+        CategoryID  => 1,
+        StateID     => 1,
+        LanguageID  => 1,
+        Keywords    => 'test1 test2 test3 test4',
+        UserID      => 1,
+        ContentType => 'text/html',
+    );
+    $Self->True(
+        $FAQID3,
+        "FAQAdd() - 3",
+    );
+
+    my $FAQID4 = $FAQObject->FAQAdd(
+        Title       => 'Test FAQ-4',
+        CategoryID  => 1,
+        StateID     => 1,
+        LanguageID  => 1,
+        Keywords    => 'test3 test1 test4 test2',
+        UserID      => 1,
+        ContentType => 'text/html',
+    );
+    $Self->True(
+        $FAQID4,
+        "FAQAdd() - 4",
+    );
+
     @Tests = (
         {
             Name   => 'Keywords',
@@ -926,6 +954,16 @@ $Self->True(
             },
             ExpectedResults => [
                 $FAQID1
+            ],
+        },
+        {
+            Name   => 'Keywords with spaces',
+            Config => {
+                Keyword => 'test2 test4 test3 test1',
+            },
+            ExpectedResults => [
+                $FAQID4,
+                $FAQID3
             ],
         },
         {

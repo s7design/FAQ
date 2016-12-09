@@ -492,28 +492,34 @@ sub FAQSearch {
 
     # search for keywords
     if ( $Param{Keyword} ) {
-        if ($Ext) {
-            $Ext .= ' AND';
-        }
-        $Param{Keyword} = "\%$Param{Keyword}\%";
-        $Param{Keyword} =~ s/\*/%/g;
-        $Param{Keyword} =~ s/%%/%/g;
-        $Param{Keyword} = $DBObject->Quote( $Param{Keyword}, 'Like' );
+        my @Keywords = split / /, $Param{Keyword};
 
-        if ( $DBObject->GetDatabaseFunction('NoLowerInLargeText') ) {
-            $Ext .= " i.f_keywords LIKE '" . $Param{Keyword} . "' $Self->{LikeEscapeString}";
-        }
-        elsif ( $DBObject->GetDatabaseFunction('LcaseLikeInLargeText') ) {
-            $Ext
-                .= " LCASE(i.f_keywords) LIKE LCASE('"
-                . $Param{Keyword}
-                . "') $Self->{LikeEscapeString}";
-        }
-        else {
-            $Ext
-                .= " LOWER(i.f_keywords) LIKE LOWER('"
-                . $Param{Keyword}
-                . "') $Self->{LikeEscapeString}";
+        for my $Keyword (@Keywords) {
+
+            if ($Ext) {
+                $Ext .= ' AND';
+            }
+
+            $Keyword = "\%$Keyword\%";
+            $Keyword =~ s/\*/%/g;
+            $Keyword =~ s/%%/%/g;
+            $Keyword = $DBObject->Quote( $Keyword, 'Like' );
+
+            if ( $DBObject->GetDatabaseFunction('NoLowerInLargeText') ) {
+                $Ext .= " i.f_keywords LIKE '" . $Keyword . "' $Self->{LikeEscapeString}";
+            }
+            elsif ( $DBObject->GetDatabaseFunction('LcaseLikeInLargeText') ) {
+                $Ext
+                    .= " LCASE(i.f_keywords) LIKE LCASE('"
+                    . $Keyword
+                    . "') $Self->{LikeEscapeString}";
+            }
+            else {
+                $Ext
+                    .= " LOWER(i.f_keywords) LIKE LOWER('"
+                    . $Keyword
+                    . "') $Self->{LikeEscapeString}";
+            }
         }
     }
 
