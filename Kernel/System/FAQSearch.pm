@@ -492,6 +492,9 @@ sub FAQSearch {
 
     # search for keywords
     if ( $Param{Keyword} ) {
+
+        $Param{Keyword} =~ s/,/ /g;
+        $Param{Keyword} =~ s/;/ /g;
         my @Keywords = split / /, $Param{Keyword};
 
         for my $Keyword (@Keywords) {
