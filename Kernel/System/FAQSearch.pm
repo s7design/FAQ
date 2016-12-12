@@ -493,37 +493,21 @@ sub FAQSearch {
     # search for keywords
     if ( $Param{Keyword} ) {
 
-        $Param{Keyword} =~ s/,/ /g;
-        $Param{Keyword} =~ s/;/ /g;
-        my @Keywords = split / /, $Param{Keyword};
+        $Param{Keyword} =~ s/,/&&/g;
+        $Param{Keyword} =~ s/;/&&/g;
+        $Param{Keyword} =~ s/ /&&/g;
 
-        for my $Keyword (@Keywords) {
-
-            if ($Ext) {
-                $Ext .= ' AND';
-            }
-
-            $Keyword = "\%$Keyword\%";
-            $Keyword =~ s/\*/%/g;
-            $Keyword =~ s/%%/%/g;
-            $Keyword = $DBObject->Quote( $Keyword, 'Like' );
-
-            if ( $DBObject->GetDatabaseFunction('NoLowerInLargeText') ) {
-                $Ext .= " i.f_keywords LIKE '" . $Keyword . "' $Self->{LikeEscapeString}";
-            }
-            elsif ( $DBObject->GetDatabaseFunction('LcaseLikeInLargeText') ) {
-                $Ext
-                    .= " LCASE(i.f_keywords) LIKE LCASE('"
-                    . $Keyword
-                    . "') $Self->{LikeEscapeString}";
-            }
-            else {
-                $Ext
-                    .= " LOWER(i.f_keywords) LIKE LOWER('"
-                    . $Keyword
-                    . "') $Self->{LikeEscapeString}";
-            }
+        if ($Ext) {
+            $Ext .= ' AND';
         }
+
+        # add the SQL for the keyword search
+        $Ext .= $DBObject->QueryCondition(
+            Key          => 'i.f_keywords',
+            Value        => $Param{Keyword},
+            SearchPrefix => '*',
+            SearchSuffix => '*',
+        );
     }
 
     # show only approved FAQ articles for public and customer interface

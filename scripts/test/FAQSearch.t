@@ -1041,6 +1041,25 @@ $Self->True(
             ],
         },
         {
+            Name   => 'Keywords only Keyword5 - uppercase string',
+            Config => {
+                Keyword => uc $Keywords{Keyword5},
+            },
+            ExpectedResults => [
+                $FAQID3
+            ],
+        },
+        {
+            Name   => 'Keywords only Keyword4 - first character uppercase',
+            Config => {
+                Keyword => ucfirst $Keywords{Keyword4},
+            },
+            ExpectedResults => [
+                $FAQID5,
+                $FAQID4
+            ],
+        },
+        {
             Name   => 'Title',
             Config => {
                 Title   => 'tITLe',
